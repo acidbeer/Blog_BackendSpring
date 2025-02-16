@@ -38,11 +38,28 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
+                        // Cualquier usuario puede acceder a los métodos GET
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+
+                        // Cualquier usuario puede acceder a la autenticación (login, registro)
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // Cualquier usuario autenticado puede crear comentarios
+                        .requestMatchers(HttpMethod.POST, "/api/publicaciones/*/comentarios").authenticated()
+
+                        // Solo ADMIN puede crear, modificar o eliminar publicaciones
+                        .requestMatchers(HttpMethod.POST, "/api/publicaciones/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/publicaciones/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/publicaciones/**").hasRole("ADMIN")
+
+                        // Solo ADMIN puede modificar o eliminar comentarios
+                        .requestMatchers(HttpMethod.PUT, "/api/publicaciones/*/comentarios/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/publicaciones/*/comentarios/*").hasRole("ADMIN")
+
+                        // Cualquier otra solicitud requiere autenticación
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Se pasa como argumento
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
