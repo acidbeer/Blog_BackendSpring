@@ -81,12 +81,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ Nueva forma de configurar CORS en Spring Boot 3
+    // Nueva forma de configurar CORS en Spring Boot 3
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // 👈 Permite el frontend de React
+        config.setAllowedOrigins(List.of("http://localhost:5173")); // Permite el frontend de React
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
