@@ -1,5 +1,6 @@
 package com.sitema.blog.sistema_blog_spring_boot.seguridad;
 
+import com.sitema.blog.sistema_blog_spring_boot.entidades.Usuario;
 import com.sitema.blog.sistema_blog_spring_boot.excepciones.BlogAppExceptions;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -7,11 +8,14 @@ import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
@@ -30,15 +34,23 @@ public class JwtTokenProvider {
     }
 
     public String generarToken(Authentication authentication) {
-        String username = authentication.getName();
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal(); // ✅ Usar CustomUserDetails
+
+        String username = userDetails.getUsername();
+        Set<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+
         Date fechaActual = new Date();
         Date fechaExpiracion = new Date(fechaActual.getTime() + jwtExpirationInMs);
 
         return Jwts.builder()
-                .subject(username)
+                .subject(username) // Email del usuario
+                .claim("roles", roles) // Incluir roles en el token
                 .issuedAt(fechaActual)
                 .expiration(fechaExpiracion)
-                .signWith(jwtSecretKey, SignatureAlgorithm.HS512) //  Se usa una clave segura
+                .signWith(jwtSecretKey, SignatureAlgorithm.HS512)
                 .compact();
     }
 
@@ -49,6 +61,15 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getSubject();
+    }
+
+    public Set<String> obtenerRolesDelJWT(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(jwtSecretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("roles", Set.class);
     }
 
     public boolean validarToken(String token) {

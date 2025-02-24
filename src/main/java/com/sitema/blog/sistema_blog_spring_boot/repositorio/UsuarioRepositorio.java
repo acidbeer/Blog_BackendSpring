@@ -2,7 +2,7 @@ package com.sitema.blog.sistema_blog_spring_boot.repositorio;
 
 import com.sitema.blog.sistema_blog_spring_boot.entidades.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
 
 import java.util.Optional;
 
