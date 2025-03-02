@@ -2,6 +2,7 @@ package com.sitema.blog.sistema_blog_spring_boot.controlador;
 
 import com.sitema.blog.sistema_blog_spring_boot.dto.PublicacionDTO;
 import com.sitema.blog.sistema_blog_spring_boot.dto.PublicacionRespuesta;
+import com.sitema.blog.sistema_blog_spring_boot.dto.ResponsePublicacionDTO;
 import com.sitema.blog.sistema_blog_spring_boot.servicio.PublicacionServicio;
 import com.sitema.blog.sistema_blog_spring_boot.utilerias.AppConstantes;
 import jakarta.validation.Valid;
@@ -30,6 +31,17 @@ public class PublicacionControlador {
 
         return publicacionServicio.obtenerTodasLasPublicaciones(numeroDePagina, medidaDePagina, ordenarPor, sortDir);
     }
+
+    @GetMapping("/titulo")
+    public ResponsePublicacionDTO listaPublicacionesT(
+            @RequestParam(value = "pageNo", defaultValue = AppConstantes.NUMERO_DE_PAGINA_POR_DEFECTO, required = false) int numeroDePagina
+            , @RequestParam(value = "pageSize", defaultValue = AppConstantes.MEDIDA_DE_PAGINA_POR_DEFECTO, required = false) int medidaDePagina
+            , @RequestParam(value = "sortBy", defaultValue = AppConstantes.ORDENAR_POR_DEFECTO, required = false) String ordenarPor
+            , @RequestParam(value = "sortDir", defaultValue = AppConstantes.ORDENAR_DIRECCION_POR_DEFECTO, required = false) String sortDir) {
+
+        return publicacionServicio.obtenerTodasLasPublicacionesT(numeroDePagina, medidaDePagina, ordenarPor, sortDir);
+    }
+
 
 
     @GetMapping("/{id}")

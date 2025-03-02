@@ -2,6 +2,8 @@ package com.sitema.blog.sistema_blog_spring_boot.servicio;
 
 import com.sitema.blog.sistema_blog_spring_boot.dto.PublicacionDTO;
 import com.sitema.blog.sistema_blog_spring_boot.dto.PublicacionRespuesta;
+import com.sitema.blog.sistema_blog_spring_boot.dto.PublicacionTituloDTO;
+import com.sitema.blog.sistema_blog_spring_boot.dto.ResponsePublicacionDTO;
 import com.sitema.blog.sistema_blog_spring_boot.entidades.Publicacion;
 import com.sitema.blog.sistema_blog_spring_boot.excepciones.ResourceNotFoundException;
 import com.sitema.blog.sistema_blog_spring_boot.repositorio.PublicacionRepositorio;
@@ -59,6 +61,31 @@ public class PublicacionServicioImpl implements PublicacionServicio{
         return publicacionRespuesta;
     }
 
+    //Metodo para listar titulos de publicaciones
+    @Override
+    public ResponsePublicacionDTO obtenerTodasLasPublicacionesT(int numeroDePagina, int medidaDePagina, String ordenarPor, String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?Sort.by(ordenarPor).ascending():Sort.by(ordenarPor).descending();
+
+        Pageable pageable = PageRequest.of(numeroDePagina,medidaDePagina, sort);
+
+        Page<Publicacion> publicaciones = publicacionRepositorio.findAllBy(pageable);
+
+        List<Publicacion> listaDePublicaciones = publicaciones.getContent();
+        List<PublicacionTituloDTO> contenido =listaDePublicaciones.stream().map(publicacion -> mapearDTOt(publicacion))
+                .collect(Collectors.toList());
+
+        ResponsePublicacionDTO responsePublicacionDTO = new ResponsePublicacionDTO();
+        responsePublicacionDTO.setContenido(contenido);
+        responsePublicacionDTO.setNumeroPagina(publicaciones.getNumber());
+        responsePublicacionDTO.setMedidaDePagina(publicaciones.getSize());
+        responsePublicacionDTO.setTotalElementos(publicaciones.getTotalElements());
+        responsePublicacionDTO.setTotalPaginas(publicaciones.getTotalPages());
+        responsePublicacionDTO.setUltima(publicaciones.isLast());
+
+        return responsePublicacionDTO;
+    }
+
     @Override
     public PublicacionDTO obtenerPubicacionPorId(Long id) {
 
@@ -97,6 +124,14 @@ public class PublicacionServicioImpl implements PublicacionServicio{
         PublicacionDTO publicacionDTO = modelMaper.map(publicacion,PublicacionDTO.class);
 
         return publicacionDTO;
+    }
+
+    //este metodo convierte entidad a DTO
+    private PublicacionTituloDTO mapearDTOt(Publicacion publicaciont){
+
+        PublicacionTituloDTO publicacionTituloDTO1 = modelMaper.map(publicaciont,PublicacionTituloDTO.class);
+
+        return publicacionTituloDTO1;
     }
 
     //convierte de DTO a entidad
